@@ -5,7 +5,7 @@
 OpenBright uses native macOS Metal APIs to unlock the full brightness potential of your Liquid Retina XDR display, pushing it beyond the standard 500-nit limit to its hardware maximum (up to 1600 nits), similar to paid tools like *Vivid* or *BetterDisplay*, but completely free and open source.
 
 > [!NOTE]
-> **Developer Preview**: This project is currently provided as source code. You will need to compile it (one liner below) to run it. A pre-compiled `.app` is coming soon.
+> **Developer Preview**: This project is provided as source code. You can easily build the app yourself using the included script.
 
 ## 🚀 How It Works (The Technical Part)
 
@@ -33,24 +33,19 @@ This tool works on Apple Silicon Macs with **Liquid Retina XDR** displays:
 To run the app from source:
 
 ```bash
-# Compile
-swiftc main.swift StatusBarController.swift OverlayWindow.swift EDRView.swift ControlPanel.swift -o XDRBrightEx -framework Cocoa -framework SwiftUI -framework Metal -framework QuartzCore
+# Option 1: Build the full App Bundle (Recommended)
+./Scripts/build_app.sh
+open OpenBright.app
 
-# Run
-./XDRBrightEx
+# Option 2: Build Installer (DMG)
+./Scripts/package_dmg.sh
 ```
 
 Once running:
 1.  Look for the "Sun" icon in your Menu Bar.
 2.  Click **"Toggle High Brightness"** (or press `Cmd+B` while the menu is open).
 3.  The screen will instantly boost to max brightness.
-
-## ✅ TODO / Roadmap
-
-- [ ] Create a downloadable, notarized `.app` for non-coders (DMG installer).
-- [ ] Add "HDR Content Detection" (Auto-disable when watching real HDR movies to prevent clipping).
-- [ ] Battery protection mode (Force disable on low battery).
-- [ ] Battery protection mode (Force disable on low battery).
+4.  **Note:** OpenBright remembers your state. If you quit or restart with it ON, it will launch ON.
 
 ## 🛡️ Safety & Disclaimer
 

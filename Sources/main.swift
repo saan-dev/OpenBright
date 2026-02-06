@@ -2,11 +2,11 @@ import Cocoa
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var statusBarController: StatusBarController?
+    var displayControls: DisplayControls?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Create the status bar controller
-        statusBarController = StatusBarController()
+        displayControls = DisplayControls()
     }
 }
 

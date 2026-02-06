@@ -12,7 +12,8 @@ class CalibrationPanel: NSPanel {
     var onAlphaChanged: ((Float) -> Void)?
     
     init() {
-        super.init(contentRect: NSRect(x: 100, y: 100, width: 300, height: 200),
+        // Adjusted height for extra padding
+        super.init(contentRect: NSRect(x: 100, y: 100, width: 320, height: 300),
                    styleMask: [.titled, .closable, .hudWindow, .utilityWindow, .nonactivatingPanel],
                    backing: .buffered,
                    defer: false)
@@ -29,7 +30,8 @@ class CalibrationPanel: NSPanel {
         let stackView = NSStackView()
         stackView.orientation = .vertical
         stackView.spacing = 20
-        stackView.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        // Expanded vertical padding as requested
+        stackView.edgeInsets = NSEdgeInsets(top: 50, left: 30, bottom: 50, right: 30)
         stackView.alignment = .leading
         
         // --- RGB Slider Section ---
@@ -60,12 +62,28 @@ class CalibrationPanel: NSPanel {
         stackView.addArrangedSubview(alphaSlider)
         stackView.addArrangedSubview(alphaLabel)
         
+        // --- Reset Button Section ---
+        // Separator removed as requested
+        
+        let resetButton = NSButton(title: "Reset (Default)", target: self, action: #selector(resetDefaults))
+        resetButton.bezelStyle = .rounded
+        stackView.addArrangedSubview(resetButton)
+        
         self.contentView?.addSubview(stackView)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: self.contentView!.centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: self.contentView!.centerYAnchor)
         ])
+    }
+    
+    @objc private func resetDefaults() {
+        // Restore defaults
+        rgbSlider.floatValue = 850.9
+        alphaSlider.floatValue = 0.0000435
+        
+        // Trigger updates
+        sliderChanged()
     }
     
     @objc private func sliderChanged() {
