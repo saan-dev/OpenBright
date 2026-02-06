@@ -11,7 +11,7 @@
 
 OpenBright is a lightweight, native macOS utility that bypasses the software-imposed 500-nit brightness clamp on Apple Silicon MacBook Pros. It forces the display controller to engage EDR (Extended Dynamic Range) headroom, typically reserved for HDR content, allowing the full 1600 nits to be used for standard desktop tasks.
 
-It is a free, MIT-licensed alternative to closed-source tools like *Vivid* or *BetterDisplay*.
+It is a free, MIT-licensed alternative to commercial or paid tools like *Vivid*, *BetterDisplay*, or *BrightIntosh*.
 
 ## ⚙️ Technical Implementation
 
