@@ -1,4 +1,4 @@
-# OpenBright
+# OpenBright ☼
 
 **Open Source XDR Brightness Unlocker for macOS**  
 *Unlock the full 1600 nits of your Liquid Retina XDR display using native Metal APIs.*
