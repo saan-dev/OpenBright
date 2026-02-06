@@ -1,72 +1,84 @@
-# OpenBright 1.0
+# OpenBright
 
-**Open Source XDR Brightness Unlocker for macOS**
+**Open Source XDR Brightness Unlocker for macOS**  
+*Unlock the full 1600 nits of your Liquid Retina XDR display using native Metal APIs.*
 
-OpenBright uses native macOS Metal APIs to unlock the full brightness potential of your Liquid Retina XDR display, pushing it beyond the standard 500-nit limit to its hardware maximum (up to 1600 nits), similar to paid tools like *Vivid* or *BetterDisplay*, but completely free and open source.
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)]()
+[![Build](https://img.shields.io/badge/build-passing-brightgreen)]()
 
-> [!NOTE]
-> **Developer Preview**: This project is provided as source code. You can easily build the app yourself using the included script.
+## 🚀 Overview
 
-## 🚀 How It Works (The Technical Part)
+OpenBright is a lightweight, native macOS utility that bypasses the software-imposed 500-nit brightness clamp on Apple Silicon MacBook Pros. It forces the display controller to engage EDR (Extended Dynamic Range) headroom, typically reserved for HDR content, allowing the full 1600 nits to be used for standard desktop tasks.
 
-Standard macOS apps are clamped to "SDR" brightness (Standard Dynamic Range), approx 500 nits. However, XDR displays have immense "EDR Headroom" (Extended Dynamic Range) reserved for HDR content.
+It is a free, MIT-licensed alternative to closed-source tools like *Vivid* or *BetterDisplay*.
 
-OpenBright works by creating a transparent, click-through overlay window that covers your entire screen.
-1.  **Metal Layer**: It initializes a `CAMetalLayer` with a 16-bit Floating Point pixel format (`.rgba16Float`) and the `extendedLinearDisplayP3` color space.
-2.  **Pixel Injection**: It renders a specific color value to this layer.
-    *   RGB: `850.9` (Linear P3). This massive value forces the display backend to ramp up the backlight to accommodate the "HDR" content.
-    *   Alpha: `0.0000435`. This ultra-low alpha keeps the pixel technically "visible" to the Window Server (preventing optimization culling) while remaining perceptually invisible to the human eye.
-3.  **Result**: The system sees "content" that requires 1600 nits, so it engages the full backlight. Since our content is transparent, your underlying desktop shines through at 1600 nits.
+## ⚙️ Technical Implementation
 
-## 💻 Supported Hardware
+OpenBright does **not** use private APIs, system hacks, or firmware modifications. It relies exclusively on standard frameworks (`Metal`, `CoreAnimation`, `Cocoa`).
 
-This tool works on Apple Silicon Macs with **Liquid Retina XDR** displays:
+### 1. The Metal Layer (`CAMetalLayer`)
+The core mechanism involves creating a transparent, click-through `NSWindow` that overlays the entire screen. Inside this window, we initialize a `CAMetalLayer` with specific EDR properties:
+*   **Pixel Format**: `.rgba16Float` (16-bit Floating Point).
+*   **Color Space**: `extendedLinearDisplayP3` (Crucial for unrestricted brightness values).
+*   **Compositing**: The layer is set to `wantsExtendedDynamicRangeContent = true`.
 
-*   **MacBook Pro 14-inch** (M1 Pro/Max, M2 Pro/Max, M3 Pro/Max) — 2021 and later
-*   **MacBook Pro 16-inch** (M1 Pro/Max, M2 Pro/Max, M3 Pro/Max) — 2021 and later
-*   *Potentially Pro Display XDR (Untested)*
+### 2. Pixel Injection
+To force the hardware backlight to ramp up, we render a specific pixel value into the framebuffer.
+*   **RGB Component**: `850.9` (Linear P3). This massive value signals "Max HDR Brightness" to the display engine.
+*   **Alpha Component**: `0.0000435`. This specific alpha value is key. It is high enough to prevent the Window Server from culling the layer as "invisible," but low enough to be perceptually transparent to the human eye.
 
-## 🛠️ Build & Run
+### 3. Battery Protection (`pmset`)
+High brightness consumes significantly more power. To prevent unexpected drain:
+*   OpenBright spawns a background `Process` to query `/usr/bin/pmset -g batt`.
+*   It parses the stdout stream to detect (1) Power Source and (2) Battery Percentage.
+*   **Logic**: If `Source == Battery` AND `Level < 20%`, the EDR boost is automatically disabled.
+
+### 4. Application State (Persistence)
+*   State is managed via `UserDefaults`.
+*   The app remembers `isEnabled`, `currentRGB`, and `currentAlpha` values across restarts.
+
+## 📂 Project Structure
+
+```text
+OpenBright/
+├── Sources/
+│   ├── main.swift           # Entry point
+│   ├── DisplayControls.swift # App Logic & StatusBar Management
+│   ├── EDRView.swift        # Metal Rendering Engine
+│   └── OverlayWindow.swift   # Passthrough Window Configuration
+├── Scripts/
+│   ├── build_app.sh         # Compiles source into .app bundle
+│   └── package_dmg.sh       # Creates distributable DMG
+└── Assets/
+    └── app_icon_sun.png     # Source asset for app icon
+```
+
+## 🛠 Build & Run
 
 **Prerequisites:** Xcode Command Line Tools (`xcode-select --install`).
 
-To run the app from source:
+### Option 1: Full App Bundle (Recommended)
+This script compiles the Swift sources, generates the `.icns` file from assets, and assembles the `.app` bundle.
 
 ```bash
-# Option 1: Build the full App Bundle (Recommended)
 ./Scripts/build_app.sh
 open OpenBright.app
+```
 
-# Option 2: Build Installer (DMG)
+### Option 2: Distribution DMG
+Creates a drag-and-drop installer.
+
+```bash
 ./Scripts/package_dmg.sh
 ```
 
-Once running:
-1.  Look for the "Sun" icon in your Menu Bar.
-2.  Click **"Toggle High Brightness"** (or press `Cmd+B` while the menu is open).
-3.  The screen will instantly boost to max brightness.
-4.  **Note:** OpenBright remembers your state. If you quit or restart with it ON, it will launch ON.
+## ⚠️ Gatekeeper & Signing
+This open-source project does **not** have a paid Apple Developer ID signature.
+When opening the app for the first time, you must:
+1.  **Right-Click** `OpenBright.app`.
+2.  Select **Open**.
+3.  Confirm **Open** in the dialog.
 
-## 🛡️ Safety & Disclaimer
-
-**No Private APIs. No System Hacks.**
-
-OpenBright relies exclusively on public, standard macOS frameworks (`Metal`, `CoreAnimation`, `Cocoa`).
-It does **NOT**:
-*   Modify system files or boot arguments.
-*   Flash firmware or modify hardware registries.
-*   Use private or undocumented Apple APIs.
-*   Inject code into other processes.
-
-It simply asks the OS to display a specific HDR color, and the OS handles the rest safely. Using your display at maximum brightness for extended periods (hours) may drain your battery faster and slightly increase heat, exactly as if you were watching an HDR movie or editing HDR photos.
 ## 📄 License
-
-**MIT License**
-
-Copyright (c) 2026 OpenBright Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+MIT License. Copyright (c) 2026 OpenBright Contributors.
