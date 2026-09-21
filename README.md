@@ -5,7 +5,17 @@
 
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey)]()
-[![Build](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![Build](https://github.com/saan-dev/openbright/actions/workflows/build.yml/badge.svg)](https://github.com/saan-dev/openbright/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/saan-dev/openbright?label=download)](https://github.com/saan-dev/openbright/releases/latest)
+
+<p align="center">
+  <img src="Assets/readme/comparison.png" alt="Split-screen comparison: the left half shows macOS at its default 500-nit limit, the right half shows the same desktop at 1600 nits with OpenBright enabled and its menu bar dropdown open." width="900">
+</p>
+<p align="center"><sub>Illustration. Screenshots cannot capture backlight brightness, so the difference is simulated; the menu is the real one.</sub></p>
+
+## 📥 Download
+
+Grab `OpenBright_Installer.dmg` from the [latest release](https://github.com/saan-dev/openbright/releases/latest), open it, and drag OpenBright to Applications. Every release is built from source on a clean macOS runner by the [CI workflow](.github/workflows/build.yml). See the Gatekeeper & Signing section below for the first-launch step.
 
 ## 🚀 Overview
 
@@ -50,11 +60,14 @@ OpenBright/
 ├── Scripts/
 │   ├── build_app.sh         # Compiles source into .app bundle
 │   └── package_dmg.sh       # Creates distributable DMG
-└── Assets/
-    └── app_icon_sun.png     # Source asset for app icon
+├── Assets/
+│   ├── app_icon_sun.png     # Source asset for app icon
+│   └── readme/              # README illustrations
+└── .github/workflows/
+    └── build.yml            # CI: build, package, publish releases on v* tags
 ```
 
-## 🛠 Build & Run
+## 🛠 Build from Source
 
 **Prerequisites:** Xcode Command Line Tools (`xcode-select --install`).
 
