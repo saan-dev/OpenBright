@@ -1,0 +1,10 @@
+# Build outputs (published via GitHub Releases)
+OpenBright.app/
+OpenBright_Installer.dmg
+dist/
+Scripts/OpenBright.iconset/
+Scripts/OpenBright.icns
+Scripts/XDRBrightEx
+
+# macOS
+.DS_Store
